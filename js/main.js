@@ -1,39 +1,6 @@
-// Display an empty tic-tac-toe board when the page 
-// is initially displayed.
-
-//MAYBE define whose turn????
-
-// A player can click on the nine cells to make a move.
-
-// Every click will alternate between marking an X and O.
-// Once occupied with an X or O, the cell cannot 
-// be played again.
-
-// Provide a Reset Game button that will clear the 
-// contents of the board.
-
-//=====================================
-
-// 1) Define required constants
-
-// 2) Define required variables used to track the state of the game
-
-// 3) Store elements on the page that will be accessed in code more than once in variables to make code more concise, readable and performant.
-
-// 4) Upon loading the app should:
-// 	4.1) Initialize the state variables
-// 	4.2) Render those values to the page
-// 	4.3) Wait for the user to click a square
-
-// 5) Handle a player clicking a square
-
-// 6) Handle a player clicking the replay button
-
-//====================================
 
 
-/*----- constants -----*/
-const player = {
+const playerSymbol = {
     "0" : "",
     "1" : "X", 
     "-1" : "O"
@@ -45,49 +12,63 @@ const playerColor = {
     "-1" : "#ffdcc0"
 };
 
+const playerName = {
+    "0" : "",
+    "1" : "Player 1",
+    "-1" : "Player 2"
+
+};
 const winCombos = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8],
     [0, 3, 6], [1, 4, 7], [2, 5, 8],
     [0, 4, 8], [2, 4, 6]
 ];
 
- //const cells = document.querySelectorAll(".cell");
-
-/*----- app's state (variables) -----*/
-
+ 
 let board; 
 let turn;
-let winner; //three different possibilities -
-// player that won, a tie, or game in play
+let winner; 
+let isWinner = false;
+let tie = false;
 
-
-
-
-/*----- cached element references -----*/
 const squareEl = Array.from(document.getElementsByClassName('cell'));
 const msgElm = document.getElementById('msg');
+const resetBtn = document.getElementById('resetButton');
 
 
-/*----- event listeners/ Click handlers -----*/
 
-// 5) Handle a player clicking a square
-document.addEventListener("click", function(e){
-   let target = e.target;
-   let idx = squareEl.indexOf(target);
+    document.addEventListener("click", function(e){
+        if (isWinner === false){
+            let target = e.target;
+            let idx = squareEl.indexOf(target);
+        
+            if (idx === -1){return};
+            if (board[idx]!== 0){return};
+        
+            board[idx] = turn;
+            checkWinner();
+            turn *= -1;
+        };
+        render();
+     
+     })
 
-   if (idx === -1){return};
-   if (board[idx]!== 0){return};
+document.getElementById('reset-button').addEventListener('click', init);
 
-   // edited out --- let symbol = player[turn];
+
+init();
+function init(){
+    //resets and init
+    board = [0, 0, 0, 
+             0, 0, 0, 
+             0, 0, 0, ];
+    turn = 1;
+    isWinner = false;
+    tie = false;
+    msgElm.innerText = "";
+    render();
    
-   target.innerText = player[turn];
-   target.style.backgroundColor = playerColor[turn];
-   board[idx] = turn;
-  
-   checkWinner();
-   turn *= -1;
-
-})
+}; 
 
 
 function checkWinner(){
@@ -96,35 +77,27 @@ function checkWinner(){
         winArr.forEach(idx => sum+=board[idx])
         if (Math.abs(sum) == 3){
             winner = turn;
+            isWinner = true;
+            return;
         }
-
-
         
     });
-
-
-
+    if (!board.includes(0)){tie = true};
+    
 };
-// 6) Handle a player clicking the replay button
-
-
-
-
-/*----- functions -----*/
-init();
-function init(){
-    //resets and init
-    board = [0, 0, 0, 
-             0, 0, 0, 
-             0, 0, 0, ];
-    turn = 1;
-    winner = null;
-             
-}; 
 
 
 function render(){ 
-    // reset the game
+         board.forEach(function(turn, idx){
+            let target =  squareEl[idx];
+            target.innerText = playerSymbol[turn];
+            target.style.backgroundColor = playerColor[turn];
+    });
+  
+        if (isWinner == true) {
+            msgElm.innerText = `Congratulations! ${playerName[turn * -1]} Wins!!!`
 
+    };
+        if (tie == true) msgElm.innerText = "It's a Tie! Try Again";
 };
 
